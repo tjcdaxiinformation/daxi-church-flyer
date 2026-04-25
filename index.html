@@ -1,33 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Heart, Camera, Music, ChevronRight, ChevronLeft, Info, Home } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Heart, 
+  Camera, 
+  Music, 
+  ChevronRight, 
+  ChevronLeft, 
+  Info,
+  Users,
+  CheckCircle2
+} from 'lucide-react';
 
 const App = () => {
   const [activeDay, setActiveDay] = useState(0);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-
-  // 滑動切換功能 (適合手機操作)
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && activeDay < scheduleData.length - 1) {
-      setActiveDay(prev => prev + 1);
-    } else if (isRightSwipe && activeDay > 0) {
-      setActiveDay(prev => prev - 1);
-    }
-  };
 
   const scheduleData = [
     {
@@ -88,109 +75,86 @@ const App = () => {
   ];
 
   const getTypeStyle = (type, highlight) => {
-    if (highlight) return 'bg-amber-100 border-l-4 border-amber-600 text-amber-900 font-bold';
+    if (highlight) return 'bg-amber-50 border-l-4 border-amber-500 text-amber-900';
     switch (type) {
-      case 'prayer': return 'bg-blue-50 text-blue-700';
-      case 'meal': return 'bg-gray-50 text-gray-500 italic';
-      case 'sacrament': return 'bg-red-50 text-red-700 border-l-4 border-red-500 font-bold';
+      case 'prayer': return 'bg-blue-50 text-blue-700 border-l-4 border-blue-300';
+      case 'meal': return 'bg-slate-50 text-slate-400 italic';
+      case 'sacrament': return 'bg-red-50 text-red-700 border-l-4 border-red-500';
       default: return 'bg-white text-slate-700 border border-slate-100';
     }
   };
 
-  const getIcon = (type, text) => {
-    if (text.includes('獻詩')) return <Music size={18} className="text-amber-600" />;
-    if (text.includes('大合照')) return <Camera size={18} className="text-slate-600" />;
-    switch (type) {
-      case 'prayer': return <Heart size={18} />;
-      case 'sacrament': return <Info size={18} />;
-      case 'activity': return <Users size={18} />;
-      default: return <Clock size={18} />;
-    }
+  const getIcon = (text, type) => {
+    if (text.includes('獻詩')) return <Music size={16} className="text-amber-600" />;
+    if (text.includes('大合照')) return <Camera size={16} className="text-slate-600" />;
+    if (type === 'prayer') return <Heart size={16} className="text-blue-500" />;
+    if (type === 'sacrament') return <CheckCircle2 size={16} className="text-red-500" />;
+    return <Clock size={16} className="text-slate-400" />;
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex justify-center selection:bg-amber-200">
-      <div 
-        className="w-full max-w-md bg-white min-h-screen flex flex-col shadow-2xl relative overflow-hidden"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
+    <div className="flex flex-col min-h-screen bg-slate-100 items-center">
+      {/* 手機容器 */}
+      <div className="w-full max-w-[450px] bg-white min-h-screen shadow-xl flex flex-col relative">
         
-        {/* 背景裝飾 */}
-        <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-amber-50 rounded-full opacity-50 z-0"></div>
-
         {/* 標題區 */}
-        <header className="bg-slate-800 text-white p-6 pt-10 text-center relative z-10 shadow-lg">
-          <p className="text-amber-400 font-bold tracking-widest text-xs mb-2">TRUE JESUS CHURCH</p>
-          <h1 className="text-2xl font-black mb-1">真耶穌教會 大溪教會</h1>
-          <h2 className="text-lg font-medium text-slate-300">115年上半年 靈恩佈道會</h2>
-          <div className="mt-4 inline-flex items-center px-4 py-1.5 bg-white/10 rounded-full text-xs text-slate-300 backdrop-blur-sm border border-white/10">
-            <MapPin size={12} className="mr-1.5" /> 大溪區瑞安路二段
+        <header className="bg-[#1a2a3a] text-white p-8 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <h4 className="text-amber-400 text-xs font-bold tracking-[0.2em] mb-2">TRUE JESUS CHURCH</h4>
+            <h1 className="text-2xl font-bold mb-1">真耶穌教會 大溪教會</h1>
+            <h2 className="text-lg font-light text-slate-300">115年上半年 靈恩佈道會</h2>
+            <div className="flex items-center justify-center mt-4 text-xs text-slate-400">
+              <MapPin size={12} className="mr-1" /> 桃園市大溪區民權東路185巷31號
+            </div>
           </div>
         </header>
 
-        {/* 日期導覽 - 手機優化 */}
-        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center px-2">
-           <button 
-            onClick={() => activeDay > 0 && setActiveDay(activeDay - 1)}
-            className={`p-2 ${activeDay === 0 ? 'opacity-10' : 'text-slate-400'}`}
-           >
-             <ChevronLeft size={24} />
-           </button>
-           
-           <nav className="flex-1 flex justify-around">
-            {scheduleData.map((day, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveDay(idx)}
-                className={`py-4 px-1 text-center transition-all relative ${
-                  activeDay === idx 
-                  ? 'text-amber-600 font-bold' 
-                  : 'text-slate-400'
-                }`}
-              >
-                <div className="text-[10px] leading-tight">{day.date}</div>
-                <div className="text-sm">Day {idx + 1}</div>
-                {activeDay === idx && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500 rounded-t-full"></div>
-                )}
-              </button>
-            ))}
-          </nav>
+        {/* 日期導覽 */}
+        <nav className="flex sticky top-0 z-30 bg-white border-b border-slate-100 shadow-sm">
+          {scheduleData.map((day, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveDay(idx)}
+              className={`flex-1 py-4 text-center transition-all relative ${
+                activeDay === idx ? 'text-amber-600 font-bold' : 'text-slate-400'
+              }`}
+            >
+              <span className="text-[10px] block opacity-70">{day.date}</span>
+              <span className="text-sm">Day {idx + 1}</span>
+              {activeDay === idx && (
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-500"></div>
+              )}
+            </button>
+          ))}
+        </nav>
 
-          <button 
-            onClick={() => activeDay < 3 && setActiveDay(activeDay + 1)}
-            className={`p-2 ${activeDay === 3 ? 'opacity-10' : 'text-slate-400'}`}
-          >
-             <ChevronRight size={24} />
-           </button>
-        </div>
-
-        {/* 內容區 */}
-        <main className="flex-1 p-5 pb-24 z-10">
-          <div className="flex items-center mb-6">
-             <div className="w-10 h-10 bg-amber-500 text-white rounded-2xl flex items-center justify-center font-bold text-lg shadow-lg shadow-amber-200">
-               {activeDay + 1}
-             </div>
-             <div className="ml-4">
+        {/* 主要內容 */}
+        <main className="flex-1 p-5 pb-20">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <div className="bg-amber-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg shadow-amber-100">
+                {activeDay + 1}
+              </div>
+              <div className="ml-4">
                 <h3 className="text-xl font-bold text-slate-800">{scheduleData[activeDay].title}</h3>
-                <p className="text-slate-400 text-sm font-medium">{scheduleData[activeDay].weekday}</p>
-             </div>
+                <p className="text-sm text-slate-500 font-medium">{scheduleData[activeDay].weekday}</p>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {scheduleData[activeDay].events.map((event, i) => (
               <div 
                 key={i} 
-                className={`flex items-stretch rounded-2xl overflow-hidden shadow-sm transition-transform active:scale-[0.98] ${getTypeStyle(event.type, event.highlight)}`}
+                className={`flex items-center p-4 rounded-2xl transition-all shadow-sm ${getTypeStyle(event.type, event.highlight)}`}
               >
-                <div className="w-20 py-4 flex flex-col items-center justify-center bg-black/5 font-mono text-sm">
+                <div className="w-16 font-mono text-sm opacity-60 font-medium">
                   {event.time}
                 </div>
-                <div className="flex-1 p-4 flex items-center gap-3">
-                  {getIcon(event.type, event.text)}
-                  <span className={`leading-snug ${event.highlight ? 'text-[17px]' : 'text-[15px]'}`}>
+                <div className="flex-1 flex items-center gap-3">
+                  {getIcon(event.text, event.type)}
+                  <span className={`leading-tight ${event.highlight ? 'text-lg font-bold' : 'text-[15px]'}`}>
                     {event.text}
                   </span>
                 </div>
@@ -198,38 +162,32 @@ const App = () => {
             ))}
           </div>
 
-          {/* 底部重要提醒 */}
-          <div className="mt-8 p-5 bg-slate-50 rounded-3xl border border-slate-100 flex gap-4 items-start">
-             <div className="bg-amber-500 p-2 rounded-xl text-white">
-                <Info size={20} />
-             </div>
-             <div>
-                <h4 className="font-bold text-slate-800 text-sm mb-1">溫馨提示</h4>
-                <p className="text-slate-500 text-xs leading-relaxed">
-                  {activeDay === 3 
-                    ? "今日包含重要聖職人員獻詩與大合照，請弟兄姊妹穿著正式服裝。聖餐禮前請預備聖潔的心。"
-                    : "請提前 10 分鐘入座預備心靈。佈道會期間請將手機轉為靜音或震動。"}
-                </p>
-             </div>
+          {/* 溫馨提醒 */}
+          <div className="mt-8 bg-slate-50 rounded-2xl p-5 border border-slate-100">
+            <div className="flex items-center gap-2 text-slate-800 font-bold mb-2">
+              <Info size={16} className="text-amber-500" />
+              <span className="text-sm">會務提醒</span>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              {activeDay === 3 
+                ? "本日包含重要聖禮與大合照，請穿著正式服裝。聖餐禮前請預備聖潔的心，安靜自省。"
+                : "請弟兄姊妹提早 10 分鐘入座預備心。佈道會期間請將手機轉為靜音或震動。"}
+            </p>
           </div>
         </main>
 
-        {/* 固定頁尾 */}
-        <footer className="fixed bottom-0 w-full max-w-md bg-white/90 backdrop-blur-md border-t border-slate-100 p-4 text-center">
-           <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold">115 Spring Convocation</p>
-           <p className="text-[11px] text-slate-500 italic">「全地都要向耶和華歌唱！」</p>
+        {/* 底部裝飾 */}
+        <footer className="p-6 text-center border-t border-slate-50 bg-slate-50/50">
+          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">115 Spring Convocation</p>
+          <p className="text-xs text-slate-500 italic">「全地都要向耶和華歌唱！」</p>
         </footer>
 
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        body { margin: 0; padding: 0; }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        main { animation: slideIn 0.3s ease-out; }
-      `}} />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+      `}</style>
     </div>
   );
 };
