@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, Info, Users, Heart, Camera } from 'lucide-react';
+import { Calendar, Clock, MapPin, Info, Users, Heart, Camera, Music } from 'lucide-react';
 
 const App = () => {
   const [activeDay, setActiveDay] = useState(0);
@@ -54,7 +54,7 @@ const App = () => {
       events: [
         { time: '07:30', text: '早禱 (沈育丞神學生)', type: 'prayer' },
         { time: '09:30', text: '證道：淺談靈魂 (胡明正執事)', type: 'main' },
-        { time: '10:30', text: '職務會 / 準備聖餐', type: 'activity' },
+        { time: '10:30', text: '職務會 / 準備聖餐，獻詩：傳道、新舊任負責人', type: 'activity' },
         { time: '10:50', text: '聖禮 (洗腳禮、聖餐)', type: 'sacrament', highlight: true },
         { time: '13:00', text: '大合照 / 感恩奉獻', type: 'activity', highlight: true },
         { time: '14:00', text: '午餐與大掃除', type: 'meal' },
@@ -68,11 +68,13 @@ const App = () => {
       case 'prayer': return 'bg-blue-50 text-blue-700';
       case 'meal': return 'bg-gray-50 text-gray-500 italic text-sm';
       case 'sacrament': return 'bg-red-50 text-red-700 font-bold border-l-4 border-red-500';
+      case 'activity': return 'bg-slate-50 text-slate-700 border border-slate-200';
       default: return 'bg-white text-slate-700 border border-slate-100';
     }
   };
 
-  const getIcon = (type) => {
+  const getIcon = (type, text) => {
+    if (text.includes('獻詩')) return <Music size={16} className="inline mr-2 text-amber-600" />;
     switch (type) {
       case 'prayer': return <Heart size={16} className="inline mr-2" />;
       case 'meal': return <div className="inline mr-2 text-xs">☕</div>;
@@ -141,7 +143,7 @@ const App = () => {
                   {event.time}
                 </div>
                 <div className="flex-1 flex items-center">
-                  {getIcon(event.type)}
+                  {getIcon(event.type, event.text)}
                   <span className={event.highlight ? 'text-base' : 'text-sm'}>
                     {event.text}
                   </span>
@@ -152,12 +154,12 @@ const App = () => {
 
           {/* Special Reminders for certain days */}
           {activeDay === 3 && (
-            <div className="mt-8 p-4 bg-red-50 border border-red-100 rounded-xl">
-              <h4 className="text-red-800 font-bold text-sm mb-2 flex items-center">
-                <Camera size={14} className="mr-2" /> 溫馨提醒
+            <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+              <h4 className="text-amber-800 font-bold text-sm mb-2 flex items-center">
+                <Music size={14} className="mr-2" /> 典禮提醒
               </h4>
-              <p className="text-red-700 text-xs leading-relaxed">
-                當日 13:00 進行全體大合照，請弟兄姊妹穿著正式服裝。聖餐禮前請自省，預備聖潔的心。
+              <p className="text-amber-700 text-xs leading-relaxed">
+                10:30 將由傳道及新舊任負責人獻詩，請弟兄姊妹一同在靈裡領受。13:00 進行全體大合照，請穿著正式服裝。
               </p>
             </div>
           )}
