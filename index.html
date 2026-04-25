@@ -1,8 +1,33 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, Info, Users, Heart, Camera, Music } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, MapPin, Heart, Camera, Music, ChevronRight, ChevronLeft, Info, Home } from 'lucide-react';
 
 const App = () => {
   const [activeDay, setActiveDay] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // 滑動切換功能 (適合手機操作)
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && activeDay < scheduleData.length - 1) {
+      setActiveDay(prev => prev + 1);
+    } else if (isRightSwipe && activeDay > 0) {
+      setActiveDay(prev => prev - 1);
+    }
+  };
 
   const scheduleData = [
     {
@@ -63,88 +88,109 @@ const App = () => {
   ];
 
   const getTypeStyle = (type, highlight) => {
-    if (highlight) return 'bg-amber-100 border-l-4 border-amber-600 text-amber-900 font-bold shadow-sm';
+    if (highlight) return 'bg-amber-100 border-l-4 border-amber-600 text-amber-900 font-bold';
     switch (type) {
       case 'prayer': return 'bg-blue-50 text-blue-700';
-      case 'meal': return 'bg-gray-50 text-gray-500 italic text-sm';
-      case 'sacrament': return 'bg-red-50 text-red-700 font-bold border-l-4 border-red-500';
-      case 'activity': return 'bg-slate-50 text-slate-700 border border-slate-200';
+      case 'meal': return 'bg-gray-50 text-gray-500 italic';
+      case 'sacrament': return 'bg-red-50 text-red-700 border-l-4 border-red-500 font-bold';
       default: return 'bg-white text-slate-700 border border-slate-100';
     }
   };
 
   const getIcon = (type, text) => {
-    if (text.includes('獻詩')) return <Music size={16} className="inline mr-2 text-amber-600" />;
+    if (text.includes('獻詩')) return <Music size={18} className="text-amber-600" />;
+    if (text.includes('大合照')) return <Camera size={18} className="text-slate-600" />;
     switch (type) {
-      case 'prayer': return <Heart size={16} className="inline mr-2" />;
-      case 'meal': return <div className="inline mr-2 text-xs">☕</div>;
-      case 'sacrament': return <Info size={16} className="inline mr-2" />;
-      case 'activity': return <Users size={16} className="inline mr-2" />;
-      default: return <Clock size={16} className="inline mr-2" />;
+      case 'prayer': return <Heart size={18} />;
+      case 'sacrament': return <Info size={18} />;
+      case 'activity': return <Users size={18} />;
+      default: return <Clock size={18} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex justify-center">
-      <div className="w-full max-w-md bg-white shadow-2xl min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-900 flex justify-center selection:bg-amber-200">
+      <div 
+        className="w-full max-w-md bg-white min-h-screen flex flex-col shadow-2xl relative overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         
-        {/* Header Section */}
-        <header className="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-8 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-             <Calendar size={120} />
-          </div>
-          <div className="relative z-10">
-            <p className="text-amber-400 font-bold tracking-widest text-sm mb-2 uppercase">True Jesus Church</p>
-            <h1 className="text-2xl font-black mb-1">真耶穌教會 大溪教會</h1>
-            <h2 className="text-xl font-light text-slate-300">115年上半年 靈恩佈道會</h2>
-            <div className="mt-4 inline-flex items-center px-3 py-1 bg-white/10 rounded-full text-xs text-slate-300">
-              <MapPin size={12} className="mr-1" /> 大溪區瑞安路二段
-            </div>
+        {/* 背景裝飾 */}
+        <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-amber-50 rounded-full opacity-50 z-0"></div>
+
+        {/* 標題區 */}
+        <header className="bg-slate-800 text-white p-6 pt-10 text-center relative z-10 shadow-lg">
+          <p className="text-amber-400 font-bold tracking-widest text-xs mb-2">TRUE JESUS CHURCH</p>
+          <h1 className="text-2xl font-black mb-1">真耶穌教會 大溪教會</h1>
+          <h2 className="text-lg font-medium text-slate-300">115年上半年 靈恩佈道會</h2>
+          <div className="mt-4 inline-flex items-center px-4 py-1.5 bg-white/10 rounded-full text-xs text-slate-300 backdrop-blur-sm border border-white/10">
+            <MapPin size={12} className="mr-1.5" /> 大溪區瑞安路二段
           </div>
         </header>
 
-        {/* Date Selector Navigation */}
-        <nav className="flex bg-slate-100 sticky top-0 z-20 shadow-sm">
-          {scheduleData.map((day, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveDay(idx)}
-              className={`flex-1 py-4 text-center transition-all duration-300 border-b-4 ${
-                activeDay === idx 
-                ? 'border-amber-500 bg-white text-amber-600 font-bold' 
-                : 'border-transparent text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              <div className="text-xs">{day.date}</div>
-              <div className="text-sm">Day {idx + 1}</div>
-            </button>
-          ))}
-        </nav>
+        {/* 日期導覽 - 手機優化 */}
+        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center px-2">
+           <button 
+            onClick={() => activeDay > 0 && setActiveDay(activeDay - 1)}
+            className={`p-2 ${activeDay === 0 ? 'opacity-10' : 'text-slate-400'}`}
+           >
+             <ChevronLeft size={24} />
+           </button>
+           
+           <nav className="flex-1 flex justify-around">
+            {scheduleData.map((day, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveDay(idx)}
+                className={`py-4 px-1 text-center transition-all relative ${
+                  activeDay === idx 
+                  ? 'text-amber-600 font-bold' 
+                  : 'text-slate-400'
+                }`}
+              >
+                <div className="text-[10px] leading-tight">{day.date}</div>
+                <div className="text-sm">Day {idx + 1}</div>
+                {activeDay === idx && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500 rounded-t-full"></div>
+                )}
+              </button>
+            ))}
+          </nav>
 
-        {/* Content Section */}
-        <main className="flex-1 p-6 animate-fadeIn">
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-800 flex items-center">
-              <span className="w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center mr-3 text-sm">
-                {activeDay + 1}
-              </span>
-              {scheduleData[activeDay].title}
-            </h3>
-            <p className="text-slate-400 text-xs ml-11">{scheduleData[activeDay].weekday}</p>
+          <button 
+            onClick={() => activeDay < 3 && setActiveDay(activeDay + 1)}
+            className={`p-2 ${activeDay === 3 ? 'opacity-10' : 'text-slate-400'}`}
+          >
+             <ChevronRight size={24} />
+           </button>
+        </div>
+
+        {/* 內容區 */}
+        <main className="flex-1 p-5 pb-24 z-10">
+          <div className="flex items-center mb-6">
+             <div className="w-10 h-10 bg-amber-500 text-white rounded-2xl flex items-center justify-center font-bold text-lg shadow-lg shadow-amber-200">
+               {activeDay + 1}
+             </div>
+             <div className="ml-4">
+                <h3 className="text-xl font-bold text-slate-800">{scheduleData[activeDay].title}</h3>
+                <p className="text-slate-400 text-sm font-medium">{scheduleData[activeDay].weekday}</p>
+             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {scheduleData[activeDay].events.map((event, i) => (
               <div 
                 key={i} 
-                className={`p-4 rounded-xl flex items-center transition-all ${getTypeStyle(event.type, event.highlight)}`}
+                className={`flex items-stretch rounded-2xl overflow-hidden shadow-sm transition-transform active:scale-[0.98] ${getTypeStyle(event.type, event.highlight)}`}
               >
-                <div className="w-16 font-mono font-medium opacity-70">
+                <div className="w-20 py-4 flex flex-col items-center justify-center bg-black/5 font-mono text-sm">
                   {event.time}
                 </div>
-                <div className="flex-1 flex items-center">
+                <div className="flex-1 p-4 flex items-center gap-3">
                   {getIcon(event.type, event.text)}
-                  <span className={event.highlight ? 'text-base' : 'text-sm'}>
+                  <span className={`leading-snug ${event.highlight ? 'text-[17px]' : 'text-[15px]'}`}>
                     {event.text}
                   </span>
                 </div>
@@ -152,35 +198,37 @@ const App = () => {
             ))}
           </div>
 
-          {/* Special Reminders for certain days */}
-          {activeDay === 3 && (
-            <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-xl">
-              <h4 className="text-amber-800 font-bold text-sm mb-2 flex items-center">
-                <Music size={14} className="mr-2" /> 典禮提醒
-              </h4>
-              <p className="text-amber-700 text-xs leading-relaxed">
-                10:30 將由傳道及新舊任負責人獻詩，請弟兄姊妹一同在靈裡領受。13:00 進行全體大合照，請穿著正式服裝。
-              </p>
-            </div>
-          )}
+          {/* 底部重要提醒 */}
+          <div className="mt-8 p-5 bg-slate-50 rounded-3xl border border-slate-100 flex gap-4 items-start">
+             <div className="bg-amber-500 p-2 rounded-xl text-white">
+                <Info size={20} />
+             </div>
+             <div>
+                <h4 className="font-bold text-slate-800 text-sm mb-1">溫馨提示</h4>
+                <p className="text-slate-500 text-xs leading-relaxed">
+                  {activeDay === 3 
+                    ? "今日包含重要聖職人員獻詩與大合照，請弟兄姊妹穿著正式服裝。聖餐禮前請預備聖潔的心。"
+                    : "請提前 10 分鐘入座預備心靈。佈道會期間請將手機轉為靜音或震動。"}
+                </p>
+             </div>
+          </div>
         </main>
 
-        {/* Footer Section */}
-        <footer className="p-8 bg-slate-50 border-t border-slate-100 text-center text-slate-400 text-xs">
-          <p className="mb-2 italic">「你們要向耶和華唱新歌！全地都要向耶和華歌唱！」</p>
-          <div className="h-1 w-12 bg-slate-200 mx-auto mb-4 rounded-full"></div>
-          <p>&copy; 115 真耶穌教會 大溪教會 籌備小組</p>
+        {/* 固定頁尾 */}
+        <footer className="fixed bottom-0 w-full max-w-md bg-white/90 backdrop-blur-md border-t border-slate-100 p-4 text-center">
+           <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold">115 Spring Convocation</p>
+           <p className="text-[11px] text-slate-500 italic">「全地都要向耶和華歌唱！」</p>
         </footer>
+
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+        body { margin: 0; padding: 0; }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(20px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        .animate-fadeIn {
-          animation: fadeIn 0.4s ease-out forwards;
-        }
+        main { animation: slideIn 0.3s ease-out; }
       `}} />
     </div>
   );
